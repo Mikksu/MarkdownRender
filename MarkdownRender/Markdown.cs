@@ -9,9 +9,19 @@ namespace MarkdownRender
 {
     public class Markdown
     {
-        public static string ConvertToHtml(string md)
+        /// <summary>
+        /// Convert the Markdown to html with the Pandoc.
+        /// </summary>
+        /// <param name="md">The content of the Markdown.</param>
+        /// <param name="pathPandoc">The path of the Pandoc.exe</param>
+        /// <param name="args">The arguments for the Pandoc. If empty, the default args will be used.</param>
+        /// <returns></returns>
+        public static string ConvertToHtml(string md, string pathPandoc = null, string args = null)
         {
-            var html = Pandoc(md, "-s --highlight-style haddock -f markdown_github-emoji+tex_math_dollars -t html5 --email-obfuscation=none --mathjax");
+            var argsPandoc = string.IsNullOrEmpty(args)
+                ? "-s --highlight-style haddock -f markdown_github-emoji+tex_math_dollars -t html5 --email-obfuscation=none --mathjax"
+                : args;
+            var html = Pandoc(md, pathPandoc, args);
             var template = GetTemplateHtml();
             var rendered = RenderWithTemplate(template, html);
             return rendered;
@@ -94,14 +104,15 @@ namespace MarkdownRender
             return doc.DocumentNode.WriteTo();
         }
 
-        public static string Pandoc(string text, string args)
+        private static string Pandoc(string text, string pathPandoc, string args)
         {
+            var whereIsPandoc = string.IsNullOrEmpty(pathPandoc) ? "pandoc.exe" : pathPandoc;
             var pandoc = ProcessStartInfo("pandoc.exe", args, text != null);
 
             return ResultFromExecuteProcess(text, pandoc);
         }
 
-        public static string ResultFromExecuteProcess(string text, ProcessStartInfo startInfo)
+        private static string ResultFromExecuteProcess(string text, ProcessStartInfo startInfo)
         {
             using (var process = Process.Start(startInfo))
             {
@@ -126,7 +137,7 @@ namespace MarkdownRender
             }
         }
 
-        public static ProcessStartInfo ProcessStartInfo(string fileName, string arguments, bool redirectInput)
+        private static ProcessStartInfo ProcessStartInfo(string fileName, string arguments, bool redirectInput)
         {
             return new ProcessStartInfo
             {
