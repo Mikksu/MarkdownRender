@@ -1,7 +1,9 @@
 ﻿using HtmlAgilityPack;
-using MarkdownRender.Properties;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
+using MarkdownRender.Properties;
 
 namespace MarkdownRender
 {
@@ -9,7 +11,7 @@ namespace MarkdownRender
     {
         public static string ConvertToHtml(string md)
         {
-            var html = CommonMark.CommonMarkConverter.Convert(md);
+            var html = Pandoc(md, "-s --highlight-style haddock -f markdown_github-emoji+tex_math_dollars -t html5 --email-obfuscation=none --mathjax");
             var template = GetTemplateHtml();
             var rendered = RenderWithTemplate(template, html);
             return rendered;
@@ -90,6 +92,55 @@ namespace MarkdownRender
             each(nc, node => node.Attributes.Remove("style"));
 
             return doc.DocumentNode.WriteTo();
+        }
+
+        public static string Pandoc(string text, string args)
+        {
+            var pandoc = ProcessStartInfo("pandoc.exe", args, text != null);
+
+            return ResultFromExecuteProcess(text, pandoc);
+        }
+
+        public static string ResultFromExecuteProcess(string text, ProcessStartInfo startInfo)
+        {
+            using (var process = Process.Start(startInfo))
+            {
+                if (process == null)
+                {
+                    return text;
+                }
+                if (text != null)
+                {
+                    var utf8 = new StreamWriter(process.StandardInput.BaseStream, Encoding.UTF8);
+                    utf8.Write(text);
+                    utf8.Close();
+                }
+                var result = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                
+                if (process.ExitCode == 0) return result;
+
+                var msg = process.StandardError.ReadToEnd();
+                result = string.IsNullOrEmpty(msg) ? "empty error response" : msg;
+                return result;
+            }
+        }
+
+        public static ProcessStartInfo ProcessStartInfo(string fileName, string arguments, bool redirectInput)
+        {
+            return new ProcessStartInfo
+            {
+                FileName = fileName,
+                Arguments = arguments,
+                RedirectStandardInput = redirectInput,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Utilities.AssemblyFolder()
+            };
         }
     }
 }

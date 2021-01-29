@@ -12,7 +12,7 @@ namespace MarkdownRender.Tests
         {
             // load the markdown file.
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var fileName = Path.Combine(path, "Resources\\readme.md");
+            var fileName = Path.Combine(path, "readme.md");
             var md = File.ReadAllText(fileName);
 
             // convert the markdown to the html.

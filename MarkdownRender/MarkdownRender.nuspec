@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Mikk Su</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/Mikksu/MarkdownRender</projectUrl>
+    <iconUrl>https://github.com/Mikksu/MarkdownRender</iconUrl>
+    <description>The library to convert the markdown to the html.</description>
+    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>APAS Markdown</tags>
+  </metadata>
+</package>
