@@ -139,6 +139,9 @@ namespace MarkdownRender
 
         private static ProcessStartInfo ProcessStartInfo(string fileName, string arguments, bool redirectInput)
         {
+            if (File.Exists(fileName) == false)
+                throw new FileNotFoundException("unable to find pandoc.exe");
+
             return new ProcessStartInfo
             {
                 FileName = fileName,
